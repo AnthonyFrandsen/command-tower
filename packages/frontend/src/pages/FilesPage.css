@@ -1,0 +1,53 @@
+.files-header {
+  margin-bottom: 16px;
+}
+
+.files-header .page-title {
+  margin-bottom: 8px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.crumb {
+  background: none;
+  border: none;
+  color: var(--accent);
+  padding: 2px 4px;
+  min-height: auto;
+  font-size: 0.82rem;
+  border-radius: 4px;
+}
+
+.crumb:hover {
+  background: var(--surface2);
+  color: var(--accent-hover);
+}
+
+.crumb-sep {
+  color: var(--text-muted);
+}
+
+.loading-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 16px 0;
+}
+
+.error-message {
+  background: rgba(224, 92, 92, 0.1);
+  border: 1px solid var(--error);
+  border-radius: var(--radius);
+  color: var(--error);
+  padding: 12px 16px;
+  font-size: 0.9rem;
+}

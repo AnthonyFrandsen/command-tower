@@ -1,0 +1,42 @@
+.file-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 12px;
+}
+
+.file-viewer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back-btn {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  min-height: 36px;
+  flex-shrink: 0;
+}
+
+.file-viewer-name {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-viewer-content {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  overflow: auto;
+  white-space: pre;
+  word-break: normal;
+  line-height: 1.6;
+  font-size: 0.82rem;
+  color: var(--text);
+  tab-size: 2;
+}
