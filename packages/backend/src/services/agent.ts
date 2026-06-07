@@ -116,6 +116,11 @@ export async function spawnClaudeRun(
   const args = buildClaudeArgs(prompt);
   const env: NodeJS.ProcessEnv = { ...process.env };
   if (apiKey) env.ANTHROPIC_API_KEY = apiKey;
+  // The backend container runs NODE_ENV=production, but npm respects that by
+  // omitting devDependencies during installs. Workspace commands need the full
+  // dep tree (tsc, vite, biome, etc. are devDeps), so clear it for the agent.
+  //biome-ignore lint: can't be undefined, must be unset.
+  delete env.NODE_ENV;
 
   const child = spawnFn("claude", args, {
     cwd: workspaceRoot,

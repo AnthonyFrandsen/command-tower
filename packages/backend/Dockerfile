@@ -21,7 +21,12 @@ WORKDIR /app
 RUN groupadd --gid 1001 appuser && \
     useradd --uid 1001 --gid appuser --shell /bin/bash --create-home appuser
 
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+
 RUN npm install -g @anthropic-ai/claude-code
+
+COPY packages/backend/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+RUN chmod +x /usr/local/bin/docker-entrypoint
 
 COPY --from=builder /app/packages/backend/dist ./dist
 COPY --from=builder /app/packages/backend/package.json ./package.json
@@ -33,4 +38,5 @@ USER appuser
 ENV NODE_ENV=production
 EXPOSE 3001
 
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
 CMD ["node", "dist/index.js"]
