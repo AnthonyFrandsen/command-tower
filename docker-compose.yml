@@ -14,6 +14,10 @@ services:
       PORT: "3001"
       MONGODB_URI: "mongodb://mongo:27017/command-tower"
       WORKSPACE_ROOT: "/workspace"
+      # Allow git to operate on the mounted workspace regardless of host file ownership
+      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_KEY_0: "safe.directory"
+      GIT_CONFIG_VALUE_0: "/workspace"
       # Auth — set exactly one of these in .env:
       ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
       CLAUDE_CODE_OAUTH_TOKEN: "${CLAUDE_CODE_OAUTH_TOKEN:-}"

@@ -1,4 +1,4 @@
-import type { FileApiResult, Run, RunSummary } from "./types.js";
+import type { FileApiResult, GitStatus, Run, RunSummary } from "./types.js";
 
 const BASE = "";
 
@@ -37,6 +37,16 @@ export async function deleteRun(runId: string): Promise<void> {
   if (!res.ok && res.status !== 204) {
     throw new Error(`Failed to delete run: ${res.statusText}`);
   }
+}
+
+export async function getGitStatus(): Promise<GitStatus> {
+  return apiFetch<GitStatus>("/api/git/status");
+}
+
+export async function getGitDiff(filePath?: string): Promise<string> {
+  const query = filePath ? `?path=${encodeURIComponent(filePath)}` : "";
+  const { diff } = await apiFetch<{ diff: string }>(`/api/git/diff${query}`);
+  return diff;
 }
 
 export function streamRun(

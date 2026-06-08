@@ -5,6 +5,7 @@ const links = [
   { to: "/files", label: "Files", icon: "📁" },
   { to: "/prompt", label: "Prompt", icon: "⚡" },
   { to: "/history", label: "History", icon: "📜" },
+  { to: "/git", label: "Git", icon: "🔀" },
 ];
 
 export default function NavBar() {

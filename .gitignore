@@ -5,3 +5,4 @@ dist/
 *.d.ts.map
 coverage/
 .DS_Store
+*.tsbuildinfo

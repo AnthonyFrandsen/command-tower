@@ -41,3 +41,17 @@ export interface FileResult {
 }
 
 export type FileApiResult = DirectoryResult | FileResult;
+
+export interface FileStatus {
+  path: string;
+  status: "M" | "A" | "D" | "R" | "?";
+}
+
+export interface GitStatus {
+  isGitRepo: boolean;
+  files: FileStatus[];
+}
+
+export interface GitDiff {
+  diff: string;
+}

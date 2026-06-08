@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import NavBar from "./components/NavBar.js";
 import FilesPage from "./pages/FilesPage.js";
+import GitPage from "./pages/GitPage.js";
 import HistoryPage from "./pages/HistoryPage.js";
 import PromptPage from "./pages/PromptPage.js";
 
@@ -16,6 +17,7 @@ export default function App() {
             <Route path="/prompt" element={<PromptPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/history/:runId" element={<HistoryPage />} />
+            <Route path="/git" element={<GitPage />} />
           </Routes>
         </main>
       </div>
