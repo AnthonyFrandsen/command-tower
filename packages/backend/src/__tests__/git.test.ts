@@ -71,6 +71,36 @@ describe("getGitStatus", () => {
     fs.writeFileSync(path.join(repoDir, "initial.txt"), "hello");
   });
 
+  it("excludes modified files where only line endings differ", async () => {
+    const crlfFile = path.join(repoDir, "crlf_test.txt");
+    fs.writeFileSync(crlfFile, "line1\nline2\n");
+    gitCommit(repoDir, "add crlf_test file");
+
+    // Change LF → CRLF (content identical, only line endings differ)
+    fs.writeFileSync(crlfFile, "line1\r\nline2\r\n");
+    const result = await getGitStatus(repoDir);
+    const found = result.files.find((f) => f.path === "crlf_test.txt");
+    assert.equal(found, undefined, "CRLF-only change should not appear in status");
+
+    // Restore to committed state
+    execFileSync("git", ["-C", repoDir, "checkout", "--", "crlf_test.txt"]);
+  });
+
+  it("still reports modified files with real content changes alongside line-ending noise", async () => {
+    const mixedFile = path.join(repoDir, "mixed_test.txt");
+    fs.writeFileSync(mixedFile, "alpha\nbeta\n");
+    gitCommit(repoDir, "add mixed_test file");
+
+    // Change content AND line endings
+    fs.writeFileSync(mixedFile, "alpha\r\nchanged\r\n");
+    const result = await getGitStatus(repoDir);
+    const found = result.files.find((f) => f.path === "mixed_test.txt");
+    assert.ok(found, "file with real content changes should still appear");
+    assert.equal(found.status, "M");
+
+    execFileSync("git", ["-C", repoDir, "checkout", "--", "mixed_test.txt"]);
+  });
+
   it("reports untracked files with status ?", async () => {
     fs.writeFileSync(path.join(repoDir, "untracked.txt"), "new");
     const result = await getGitStatus(repoDir);
@@ -157,6 +187,19 @@ describe("getGitDiff", () => {
     fs.writeFileSync(path.join(repoDir, "file.txt"), "original");
   });
 
+  it("returns empty diff when the only change is line endings", async () => {
+    const crlfFile = path.join(repoDir, "crlf_diff.txt");
+    fs.writeFileSync(crlfFile, "hello\nworld\n");
+    execFileSync("git", ["-C", repoDir, "add", "crlf_diff.txt"]);
+    execFileSync("git", ["-C", repoDir, "commit", "-m", "add crlf_diff file"]);
+
+    fs.writeFileSync(crlfFile, "hello\r\nworld\r\n");
+    const result = await getGitDiff(repoDir, "crlf_diff.txt");
+    assert.equal(result, "", "diff should be empty when only line endings changed");
+
+    execFileSync("git", ["-C", repoDir, "checkout", "--", "crlf_diff.txt"]);
+  });
+
   it("throws WorkspaceError for path traversal", async () => {
     await assert.rejects(
       () => getGitDiff(repoDir, "../etc/passwd"),
@@ -205,7 +248,7 @@ describe("GET /api/git/status", () => {
     fs.writeFileSync(path.join(repoDir, "new.txt"), "added");
     const app = createApp(makeConfig(repoDir));
     const res = await request(app).get("/api/git/status").expect(200);
-    const paths = (res.body.files as Array<{ path: string }>) .map((f) => f.path);
+    const paths = (res.body.files as Array<{ path: string }>).map((f) => f.path);
     assert.ok(paths.includes("new.txt"));
     fs.rmSync(path.join(repoDir, "new.txt"));
   });
@@ -275,9 +318,7 @@ describe("GET /api/git/diff", () => {
 
   it("returns 400 for path traversal attempt", async () => {
     const app = createApp(makeConfig(repoDir));
-    const res = await request(app)
-      .get("/api/git/diff?path=../etc/passwd")
-      .expect(400);
+    const res = await request(app).get("/api/git/diff?path=../etc/passwd").expect(400);
     assert.ok(res.body.error);
   });
 });

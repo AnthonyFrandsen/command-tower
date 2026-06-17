@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { WorkspaceError, resolveWorkspacePath } from "./workspace.js";
+import { resolveWorkspacePath } from "./workspace.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -35,12 +35,7 @@ export async function getGitStatus(workspaceRoot: string): Promise<GitStatusResu
     return { isGitRepo: false, files: [] };
   }
 
-  const { stdout } = await execFileAsync("git", [
-    "-C",
-    workspaceRoot,
-    "status",
-    "--porcelain",
-  ]);
+  const { stdout } = await execFileAsync("git", ["-C", workspaceRoot, "status", "--porcelain"]);
 
   const files: FileStatus[] = [];
   for (const line of stdout.split("\n")) {
@@ -63,6 +58,27 @@ export async function getGitStatus(workspaceRoot: string): Promise<GitStatusResu
     files.push({ path: filePath, status });
   }
 
+  const modifiedFiles = files.filter((f) => f.status === "M");
+  if (modifiedFiles.length > 0) {
+    try {
+      const { stdout: nameOnly } = await execFileAsync("git", [
+        "-C",
+        workspaceRoot,
+        "diff",
+        "--ignore-cr-at-eol",
+        "--name-only",
+        "HEAD",
+      ]);
+      const reallyModified = new Set(nameOnly.split("\n").filter(Boolean));
+      return {
+        isGitRepo: true,
+        files: files.filter((f) => f.status !== "M" || reallyModified.has(f.path)),
+      };
+    } catch {
+      // No HEAD yet or other git failure — return unfiltered
+    }
+  }
+
   return { isGitRepo: true, files };
 }
 
@@ -83,7 +99,14 @@ export async function getGitDiff(workspaceRoot: string, filePath?: string): Prom
     throw new GitError("no commits yet", "no_commits");
   }
 
-  const args = ["-C", workspaceRoot, "diff", "HEAD", ...(filePath ? ["--", filePath] : [])];
+  const args = [
+    "-C",
+    workspaceRoot,
+    "diff",
+    "--ignore-cr-at-eol",
+    "HEAD",
+    ...(filePath ? ["--", filePath] : []),
+  ];
 
   let stdout: string;
   try {
@@ -96,14 +119,14 @@ export async function getGitDiff(workspaceRoot: string, filePath?: string): Prom
     const error = err as { code?: string; stdout?: string };
     if (error.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER") {
       const partial = error.stdout ?? "";
-      return partial.slice(0, MAX_DIFF_BYTES) + "\n" + TRUNCATION_SENTINEL;
+      return `${partial.slice(0, MAX_DIFF_BYTES)}\n${TRUNCATION_SENTINEL}`;
     }
     throw err;
   }
 
   const buf = Buffer.from(stdout, "utf-8");
   if (buf.length > MAX_DIFF_BYTES) {
-    return buf.slice(0, MAX_DIFF_BYTES).toString("utf-8") + "\n" + TRUNCATION_SENTINEL;
+    return `${buf.slice(0, MAX_DIFF_BYTES).toString("utf-8")}\n${TRUNCATION_SENTINEL}`;
   }
 
   return stdout;
