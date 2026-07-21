@@ -40,3 +40,8 @@
   color: var(--text);
   tab-size: 2;
 }
+
+.file-viewer-markdown {
+  white-space: normal;
+  word-break: break-word;
+}

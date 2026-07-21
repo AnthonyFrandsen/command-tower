@@ -1,3 +1,4 @@
+import Markdown from "./Markdown.js";
 import "./FileViewer.css";
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 
 export default function FileViewer({ path, content, onBack }: Props) {
   const filename = path.split("/").pop() ?? path;
+  const isMarkdown = filename.toLowerCase().endsWith(".md");
 
   return (
     <div className="file-viewer">
@@ -17,9 +19,15 @@ export default function FileViewer({ path, content, onBack }: Props) {
         </button>
         <span className="file-viewer-name">{filename}</span>
       </div>
-      <pre className="file-viewer-content">
-        <code>{content}</code>
-      </pre>
+      {isMarkdown ? (
+        <div className="file-viewer-content file-viewer-markdown">
+          <Markdown text={content} />
+        </div>
+      ) : (
+        <pre className="file-viewer-content">
+          <code>{content}</code>
+        </pre>
+      )}
     </div>
   );
 }
