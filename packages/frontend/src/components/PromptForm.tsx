@@ -1,20 +1,31 @@
 import { type FormEvent, useState } from "react";
 import "./PromptForm.css";
 
+const DRAFT_KEY = "command-tower:prompt-draft";
+
 interface Props {
   onSubmit: (prompt: string) => void;
   disabled?: boolean;
 }
 
 export default function PromptForm({ onSubmit, disabled = false }: Props) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(() => localStorage.getItem(DRAFT_KEY) ?? "");
+
+  const updateValue = (next: string) => {
+    setValue(next);
+    if (next) {
+      localStorage.setItem(DRAFT_KEY, next);
+    } else {
+      localStorage.removeItem(DRAFT_KEY);
+    }
+  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const trimmed = value.trim();
     if (!trimmed || disabled) return;
     onSubmit(trimmed);
-    setValue("");
+    updateValue("");
   };
 
   return (
@@ -22,7 +33,7 @@ export default function PromptForm({ onSubmit, disabled = false }: Props) {
       <textarea
         className="prompt-textarea"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => updateValue(e.target.value)}
         placeholder="Enter a prompt for the Claude Code agent…"
         rows={5}
         disabled={disabled}
