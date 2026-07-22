@@ -19,11 +19,19 @@
 }
 
 .file-viewer-name {
+  flex: 1;
   font-size: 0.9rem;
   color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.md-toggle-btn {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  min-height: 36px;
+  flex-shrink: 0;
 }
 
 .file-viewer-content {

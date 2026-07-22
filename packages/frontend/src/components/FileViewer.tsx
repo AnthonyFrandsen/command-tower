@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Markdown from "./Markdown.js";
 import "./FileViewer.css";
 
@@ -10,6 +11,8 @@ interface Props {
 export default function FileViewer({ path, content, onBack }: Props) {
   const filename = path.split("/").pop() ?? path;
   const isMarkdown = filename.toLowerCase().endsWith(".md");
+  const [renderMarkdown, setRenderMarkdown] = useState(true);
+  const showMarkdown = isMarkdown && renderMarkdown;
 
   return (
     <div className="file-viewer">
@@ -18,8 +21,18 @@ export default function FileViewer({ path, content, onBack }: Props) {
           ← Back
         </button>
         <span className="file-viewer-name">{filename}</span>
+        {isMarkdown && (
+          <button
+            type="button"
+            className="btn-ghost md-toggle-btn"
+            aria-pressed={renderMarkdown}
+            onClick={() => setRenderMarkdown((prev) => !prev)}
+          >
+            {renderMarkdown ? "Raw" : "Preview"}
+          </button>
+        )}
       </div>
-      {isMarkdown ? (
+      {showMarkdown ? (
         <div className="file-viewer-content file-viewer-markdown">
           <Markdown text={content} />
         </div>
